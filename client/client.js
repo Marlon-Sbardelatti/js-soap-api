@@ -1,168 +1,212 @@
 const soap = require("soap");
 const url = "http://localhost:8001/UserService?wsdl"; // URL to the WSDL
+const prompt = require("prompt-sync")();
+let ids = 1;
 
-// Create a SOAP client
-soap.createClient(url, function(err, client) {
-    if (err) {
-        console.error("Error creating SOAP client:", err);
-        return;
-    }
+function createUser(client) {
+	return new Promise((resolve, reject) => {
+		let username = prompt("Name: ");
+		let email = prompt("Email: ");
+		let product = [];
+		let productID = prompt("Product ID: ");
+		let productName = prompt("Product Name: ");
+		product.push({
+			productId: parseInt(productID),
+			productName: productName,
+		});
+		console.log("(1) - New\n(2) - Finish\n");
+		let res = prompt("");
 
-    // Example of CreateUser operation
-    client.CreateUser(
-        {
-            user: {
-                id: 1,
-                name: "John Doe",
-                email: "john.doe@example.com",
-                products: {
-                    product: [
-                        // null
-                        { productId: 101, productName: "Product A" },
-                        { productId: 102, productName: "Product B" },
-                    ],
-                },
-            },
-        },
-        function(err, result) {
-            if (err) {
-                console.error("Error creating user:", err);
-            } else {
-                console.log("CreateUser response:", result);
-            }
-        },
-    );
+		while (res != 2) {
+			switch (res) {
+				case "1":
+					let productID = prompt("Product ID: ");
+					let productName = prompt("Product Name: ");
+					product.push({
+						productId: parseInt(productID),
+						productName: productName,
+					});
+					break;
+				default:
+					console.log("Insert a valid Operation");
+					break;
+			}
 
-    // Example of GetUser operation
-    client.GetUser({ id: 1 }, function(err, result) {
-        if (err) {
-            console.error("Error getting user:", err);
-        } else {
-            console.log("GetUser response:", result);
+			console.log("\n(1) - New\n(2) - Finish\n");
+			res = prompt("");
+		}
 
-            // Inspect the response structure
-            console.log("Inspect GetUser result:", JSON.stringify(result, null, 2));
+		client.CreateUser(
+			{
+				user: {
+					id: ids,
+					name: username,
+					email: email,
+					products: {
+						product,
+					},
+				},
+			},
+			function (err, result) {
+				if (err) {
+					reject(err);
+				} else {
+					ids++;
+					resolve(result);
+				}
+			},
+		);
+	});
+}
 
-            // Handle products if available
-            if (result.user && result.user.products) {
-                const products = result.user.products.product;
+function getUser(client) {
+	return new Promise((resolve, reject) => {
+		let userId = prompt("User ID: ");
+		client.GetUser({ id: userId }, function (err, result) {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(result);
+			}
+		});
+	});
+}
 
-                if (Array.isArray(products)) {
-                    console.log("User Products:");
-                    products.forEach((product) => {
-                        console.log(
-                            `Product ID: ${product.productId}, Product Name: ${product.productName}`,
-                        );
-                    });
-                } else if (products && products.productId && products.productName) {
-                    // Handle case where product is a single object
-                    console.log("User Products:");
-                    console.log(
-                        `Product ID: ${products.productId}, Product Name: ${products.productName}`,
-                    );
-                } else {
-                    console.log("No products found for this user.");
-                }
-            } else {
-                console.log("No products found for this user.");
-            }
-        }
-    });
+function updateUser(client) {
+	return new Promise((resolve, reject) => {
+		let userId = prompt("User ID: ");
+		let username = prompt("Name: ");
+		let email = prompt("Email: ");
+        let product = [];
+		let productID = prompt("Product ID: ");
+		let productName = prompt("Product Name: ");
+		product.push({
+			productId: parseInt(productID),
+			productName: productName,
+		});
+		console.log("(1) - New\n(2) - Finish\n");
+		let res = prompt("");
 
-    // Example of UpdateUser operation
-    client.UpdateUser(
-        {
-            user: {
-                id: 1,
-                name: "John Doe Updated",
-                email: "john.doe.updated@example.com",
-                products: {
-                    product: [{ productId: 103, productName: "Product C" }],
-                },
-            },
-        },
-        function(err, result) {
-            if (err) {
-                console.error("Error updating user:", err);
-            } else {
-                console.log("UpdateUser response:", result);
-            }
-        },
-    );
+		while (res != 2) {
+			switch (res) {
+				case "1":
+					let productID = prompt("Product ID: ");
+					let productName = prompt("Product Name: ");
+					product.push({
+						productId: parseInt(productID),
+						productName: productName,
+					});
+					break;
+				default:
+					console.log("Insert a valid Operation");
+					break;
+			}
 
-    // Example of GetUser operation after update
-    client.GetUser({ id: 1 }, function(err, result) {
-        if (err) {
-            console.error("Error getting user after update:", err);
-        } else {
-            console.log("here");
-            console.log(result);
-            // console.log('GetUser response after update:', result);
+			console.log("\n(1) - New\n(2) - Finish\n");
+			res = prompt("");
+		}
 
-            // // Inspect the response structure
-            // console.log('Inspect GetUser result after update:', JSON.stringify(result, null, 2));
+		client.UpdateUser(
+			{
+				user: {
+					id: userId,
+					name: username,
+					email: email,
+					products: {
+						product,
+					},
+				},
+			},
+			function (err, result) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			},
+		);
+	});
+}
 
-            // // Handle products if available
-            // if (result.user && result.user.products) {
-            //     const products = result.user.products.product;
+function deleteUser(client) {
+	return new Promise((resolve, reject) => {
+		let userId = prompt("User ID: ");
+		client.DeleteUser({ id: userId }, function (err, result) {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(result);
+			}
+		});
+	});
+}
 
-            //     if (Array.isArray(products)) {
-            //         console.log('User Products After Update:');
-            //         products.forEach(product => {
-            //             console.log(`Product ID: ${product.productId}, Product Name: ${product.productName}`);
-            //         });
-            //     } else if (products && products.productId && products.productName) {
-            //         // Handle case where product is a single object
-            //         console.log('User Products After Update:');
-            //         console.log(`Product ID: ${products.productId}, Product Name: ${products.productName}`);
-            //     } else {
-            //         console.log('No products found for this user.');
-            //     }
-            // } else {
-            //     console.log('No products found for this user.');
-            // }
-        }
-    });
+async function main() {
+	soap.createClient(url, async (err, client) => {
+		if (err) {
+			console.error("Error creating SOAP client:", err);
+			return;
+		}
+		console.log(
+			"Choose Operation\n(1) - Create User\n(2) - Get User\n(3) - Update User\n(4) - Delete User\n(5) - Exit\n",
+		);
+		let res = prompt("");
+		while (res != 5) {
+			switch (res) {
+				case "1":
+					await createUser(client)
+						.then((res) => {
+							console.log(res);
+						})
+						.catch((err) => {
+							console.log(err);
+						});
+					console.log("");
+					break;
 
-    // Example of DeleteUser operation
-    client.DeleteUser({ id: 1 }, function(err, result) {
-        if (err) {
-            console.error("Error deleting user:", err);
-        } else {
-            console.log("DeleteUser response:", result);
-        }
-    });
+				case "2":
+					await getUser(client)
+						.then((res) => {
+							console.log(JSON.stringify(res, null, 4));
+						})
+						.catch((err) => {
+							console.log(err);
+						});
+					console.log("");
+					break;
 
-    // Attempt to get user after deletion
-    // client.GetUser({ id: 1 }, function(err, result) {
-    //     if (err) {
-    //         console.error('Error getting user after deletion:', err);
-    //     } else {
-    //         console.log('GetUser response after deletion:', result);
+				case "3":
+					await updateUser(client)
+						.then((res) => {
+							console.log(res);
+						})
+						.catch((err) => {
+							console.log(err);
+						});
+					console.log("");
+					break;
 
-    //         // Inspect the response structure
-    //         console.log('Inspect GetUser result after deletion:', JSON.stringify(result, null, 2));
+				case "4":
+					await deleteUser(client)
+						.then((res) => {
+							console.log(res);
+						})
+						.catch((err) => {
+							console.log(err);
+						});
+					console.log("");
+					break;
+				default:
+					console.log("Select a valid operation");
+					break;
+			}
 
-    //         // Handle products if available
-    //         if (result.user && result.user.products) {
-    //             const products = result.user.products.product;
+			console.log(
+				"Choose Operation\n(1) - Create User\n(2) - Get User\n(3) - Update User\n(4) - Delete User\n(5) - Exit\n",
+			);
+			res = prompt("");
+		}
+	});
+}
 
-    //             if (Array.isArray(products)) {
-    //                 console.log('User Products After Deletion Attempt:');
-    //                 products.forEach(product => {
-    //                     console.log(`Product ID: ${product.productId}, Product Name: ${product.productName}`);
-    //                 });
-    //             } else if (products && products.productId && products.productName) {
-    //                 // Handle case where product is a single object
-    //                 console.log('User Products After Deletion Attempt:');
-    //                 console.log(`Product ID: ${products.productId}, Product Name: ${products.productName}`);
-    //             } else {
-    //                 console.log('No products found for this user.');
-    //             }
-    //         } else {
-    //             console.log('No products found for this user.');
-    //         }
-    //     }
-    // });
-});
-
+main();
