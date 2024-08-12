@@ -25,7 +25,7 @@ const userService = {
                 const { user } = args;
                 const { id, name, email, products } = user;
 
-                users[id] = { id, name, email, products: products.product };
+                // users[id] = { id, name, email, products: products.product };
 
                 const insertQuery = `
                     INSERT INTO Users (name, email, product_ids)
@@ -46,8 +46,13 @@ const userService = {
 
 
                 const res = await pool.query(insertQuery, [name, email, p]);
-                console.log("User inserted:", res.rows[0]);
-                return { status: "User created successfully" };
+
+                if (res.rows[0]){
+                    console.log("User inserted:", res.rows[0]);
+                    return { status: "User created successfully" };
+                } else {
+                    throw new Error("Error while creating User");
+                }
             },
             GetUser: async function(args) {
                 const { id } = args;
@@ -74,14 +79,18 @@ const userService = {
                     throw new Error("User not found");
                 }
             },
-            DeleteUser: function(args) {
+            DeleteUser: async function(args) {
                 const { id } = args;
-                if (users[id]) {
-                    delete users[id];
+
+                const res = await pool.query('DELETE FROM Users WHERE id = $1', [id]);
+
+
+                if (res.rowCount == 1) {
                     return { status: "User deleted successfully" };
                 } else {
                     throw new Error("User not found");
                 }
+
             },
         },
     },
