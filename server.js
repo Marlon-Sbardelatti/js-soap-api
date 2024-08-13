@@ -1,4 +1,5 @@
 const express = require("express");
+const dotenv = require('dotenv').config()
 const soap = require("soap");
 const fs = require("fs");
 const app = express();
@@ -7,11 +8,11 @@ const port = 8001;
 const { Client, Pool } = require("pg");
 
 const pool = new Pool({
-    user: "postgres",
-    host: "localhost",
-    database: "soap",
-    password: "ihatewin",
-    port: 5432,
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    port: process.env.PORT,
 });
 
 // Sample in-memory user storage
